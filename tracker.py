@@ -1,292 +1,134 @@
-{
-  "nbformat": 4,
-  "nbformat_minor": 0,
-  "metadata": {
-    "colab": {
-      "provenance": [],
-      "authorship_tag": "ABX9TyP5F4otYAZJqgLRSj9+MLtq",
-      "include_colab_link": true
-    },
-    "kernelspec": {
-      "name": "python3",
-      "display_name": "Python 3"
-    },
-    "language_info": {
-      "name": "python"
+import os
+
+DATA_FILE = "goals.txt"
+
+def load_goals():
+    """Reads saved goals from goals.txt line by line."""
+    goals = []
+    if not os.path.exists(DATA_FILE):
+        return goals
+    
+    with open(DATA_FILE, "r") as file:
+        for line in file:
+            line = line.strip()
+            if line:
+                parts = line.split(",")
+                if len(parts) == 5:
+                    goal = {
+                        "id": int(parts[0]),
+                        "title": parts[1],
+                        "category": parts[2],
+                        "progress": int(parts[3]),
+                        "status": parts[4]
+                    }
+                    goals.append(goal)
+    return goals
+
+def save_goals(goals):
+    """Saves updated goals to goals.txt."""
+    with open(DATA_FILE, "w") as file:
+        for g in goals:
+            file.write(f"{g['id']},{g['title']},{g['category']},{g['progress']},{g['status']}\n")
+
+def add_goal(goals):
+    """Module 1: Adds a new goal."""
+    print("\n--- ADD NEW GOAL ---")
+    title = input("Enter Goal Title: ").strip()
+    category = input("Enter Category (e.g., Academic, Fitness): ").strip()
+    
+    goal_id = len(goals) + 1
+    new_goal = {
+        "id": goal_id,
+        "title": title,
+        "category": category,
+        "progress": 0,
+        "status": "In Progress"
     }
-  },
-  "cells": [
-    {
-      "cell_type": "markdown",
-      "metadata": {
-        "id": "view-in-github",
-        "colab_type": "text"
-      },
-      "source": [
-        "<a href=\"https://colab.research.google.com/github/sanchigupta287/Goal-Tracker/blob/main/tracker.py\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
-      ]
-    },
-    {
-      "cell_type": "code",
-      "source": [
-        "import os\n",
-        "\n",
-        "DATA_FILE = \"goals.txt\"\n",
-        "\n",
-        "def load_goals():\n",
-        "    \"\"\"Reads saved goals from goals.txt line by line.\"\"\"\n",
-        "    goals = []\n",
-        "    if not os.path.exists(DATA_FILE):\n",
-        "        return goals\n",
-        "\n",
-        "    with open(DATA_FILE, \"r\") as file:\n",
-        "        for line in file:\n",
-        "            line = line.strip()\n",
-        "            if line:\n",
-        "                parts = line.split(\",\")\n",
-        "                if len(parts) == 5:\n",
-        "                    goal = {\n",
-        "                        \"id\": int(parts[0]),\n",
-        "                        \"title\": parts[1],\n",
-        "                        \"category\": parts[2],\n",
-        "                        \"progress\": int(parts[3]),\n",
-        "                        \"status\": parts[4]\n",
-        "                    }\n",
-        "                    goals.append(goal)\n",
-        "    return goals\n",
-        "\n",
-        "def save_goals(goals):\n",
-        "    \"\"\"Saves updated goals to goals.txt.\"\"\"\n",
-        "    with open(DATA_FILE, \"w\") as file:\n",
-        "        for g in goals:\n",
-        "            file.write(f\"{g['id']},{g['title']},{g['category']},{g['progress']},{g['status']}\\n\")\n",
-        "\n",
-        "def add_goal(goals):\n",
-        "    \"\"\"Module 1: Adds a new goal.\"\"\"\n",
-        "    print(\"\\n--- ADD NEW GOAL ---\")\n",
-        "    title = input(\"Enter Goal Title: \").strip()\n",
-        "    category = input(\"Enter Category (e.g., Academic, Fitness): \").strip()\n",
-        "\n",
-        "    goal_id = len(goals) + 1\n",
-        "    new_goal = {\n",
-        "        \"id\": goal_id,\n",
-        "        \"title\": title,\n",
-        "        \"category\": category,\n",
-        "        \"progress\": 0,\n",
-        "        \"status\": \"In Progress\"\n",
-        "    }\n",
-        "    goals.append(new_goal)\n",
-        "    save_goals(goals)\n",
-        "    print(f\"✅ Goal '{title}' added successfully!\")\n",
-        "\n",
-        "def view_goals(goals):\n",
-        "    \"\"\"Module 2: Displays all tracked goals.\"\"\"\n",
-        "    print(\"\\n--- YOUR GOALS ---\")\n",
-        "    if not goals:\n",
-        "        print(\"No goals found. Add one first!\")\n",
-        "        return\n",
-        "\n",
-        "    for g in goals:\n",
-        "        print(f\"[{g['id']}] {g['title']} | Category: {g['category']} | Progress: {g['progress']}% | Status: {g['status']}\")\n",
-        "\n",
-        "def update_progress(goals):\n",
-        "    \"\"\"Module 3: Updates goal progress percentage.\"\"\"\n",
-        "    view_goals(goals)\n",
-        "    if not goals:\n",
-        "        return\n",
-        "\n",
-        "    try:\n",
-        "        goal_id = int(input(\"\\nEnter Goal ID to update: \"))\n",
-        "        selected = next((g for g in goals if g[\"id\"] == goal_id), None)\n",
-        "\n",
-        "        if selected:\n",
-        "            new_prog = int(input(\"Enter new progress percentage (0-100): \"))\n",
-        "            if 0 <= new_prog <= 100:\n",
-        "                selected[\"progress\"] = new_prog\n",
-        "                if new_prog == 100:\n",
-        "                    selected[\"status\"] = \"Completed\"\n",
-        "                save_goals(goals)\n",
-        "                print(\"✅ Progress updated successfully!\")\n",
-        "            else:\n",
-        "                print(\"⚠️ Invalid percentage. Enter a value from 0 to 100.\")\n",
-        "        else:\n",
-        "            print(\"⚠️ Goal ID not found.\")\n",
-        "    except ValueError:\n",
-        "        print(\"⚠️ Invalid input! Please enter numbers only.\")\n",
-        "\n",
-        "def view_analytics(goals):\n",
-        "    \"\"\"Module 4: Generates summary statistics of tracked goals.\"\"\"\n",
-        "    print(\"\\n--- GOAL ANALYTICS & SUMMARY ---\")\n",
-        "    if not goals:\n",
-        "        print(\"No goals to analyze. Add some goals first!\")\n",
-        "        return\n",
-        "\n",
-        "    total_goals = len(goals)\n",
-        "    completed = sum(1 for g in goals if g[\"status\"] == \"Completed\")\n",
-        "    in_progress = total_goals - completed\n",
-        "    total_progress = sum(g[\"progress\"] for g in goals)\n",
-        "    avg_progress = total_progress / total_goals\n",
-        "\n",
-        "    print(f\"Total Goals Tracked : {total_goals}\")\n",
-        "    print(f\"Completed Goals     : {completed}\")\n",
-        "    print(f\"In-Progress Goals   : {in_progress}\")\n",
-        "    print(f\"Average Completion  : {avg_progress:.1f}%\")\n",
-        "\n",
-        "def main():\n",
-        "    goals = load_goals()\n",
-        "\n",
-        "    while True:\n",
-        "        print(\"\\n==============================\")\n",
-        "        print(\"   GOAL & HABIT TRACKER CLI   \")\n",
-        "        print(\"==============================\")\n",
-        "        print(\"1. Add New Goal\")\n",
-        "        print(\"2. View All Goals\")\n",
-        "        print(\"3. Update Goal Progress\")\n",
-        "        print(\"4. View Progress Analytics\")\n",
-        "        print(\"5. Exit\")\n",
-        "\n",
-        "        choice = input(\"Select an option (1-5): \").strip()\n",
-        "\n",
-        "        if choice == \"1\":\n",
-        "            add_goal(goals)\n",
-        "        elif choice == \"2\":\n",
-        "            view_goals(goals)\n",
-        "        elif choice == \"3\":\n",
-        "            update_progress(goals)\n",
-        "        elif choice == \"4\":\n",
-        "            view_analytics(goals)\n",
-        "        elif choice == \"5\":\n",
-        "            print(\"Saving data and exiting... Goodbye!\")\n",
-        "            break\n",
-        "        else:\n",
-        "            print(\"Invalid choice! Please select 1-5.\")\n",
-        "\n",
-        "if __name__ == \"__main__\":\n",
-        "    main()"
-      ],
-      "metadata": {
-        "colab": {
-          "base_uri": "https://localhost:8080/"
-        },
-        "id": "pBEHV9sJ9TgH",
-        "outputId": "3768af74-a6d8-40b1-fd34-1cf66e2f89d8"
-      },
-      "execution_count": 1,
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "\n",
-            "==============================\n",
-            "   GOAL & HABIT TRACKER CLI   \n",
-            "==============================\n",
-            "1. Add New Goal\n",
-            "2. View All Goals\n",
-            "3. Update Goal Progress\n",
-            "4. View Progress Analytics\n",
-            "5. Exit\n",
-            "Select an option (1-5): 1\n",
-            "\n",
-            "--- ADD NEW GOAL ---\n",
-            "Enter Goal Title: run 10000 steps\n",
-            "Enter Category (e.g., Academic, Fitness): fitness\n",
-            "✅ Goal 'run 10000 steps' added successfully!\n",
-            "\n",
-            "==============================\n",
-            "   GOAL & HABIT TRACKER CLI   \n",
-            "==============================\n",
-            "1. Add New Goal\n",
-            "2. View All Goals\n",
-            "3. Update Goal Progress\n",
-            "4. View Progress Analytics\n",
-            "5. Exit\n",
-            "Select an option (1-5): 1\n",
-            "\n",
-            "--- ADD NEW GOAL ---\n",
-            "Enter Goal Title: assignment eng\n",
-            "Enter Category (e.g., Academic, Fitness): academic\n",
-            "✅ Goal 'assignment eng' added successfully!\n",
-            "\n",
-            "==============================\n",
-            "   GOAL & HABIT TRACKER CLI   \n",
-            "==============================\n",
-            "1. Add New Goal\n",
-            "2. View All Goals\n",
-            "3. Update Goal Progress\n",
-            "4. View Progress Analytics\n",
-            "5. Exit\n",
-            "Select an option (1-5): 3\n",
-            "\n",
-            "--- YOUR GOALS ---\n",
-            "[1] run 10000 steps | Category: fitness | Progress: 0% | Status: In Progress\n",
-            "[2] assignment eng | Category: academic | Progress: 0% | Status: In Progress\n",
-            "\n",
-            "Enter Goal ID to update: 1\n",
-            "Enter new progress percentage (0-100): 100\n",
-            "✅ Progress updated successfully!\n",
-            "\n",
-            "==============================\n",
-            "   GOAL & HABIT TRACKER CLI   \n",
-            "==============================\n",
-            "1. Add New Goal\n",
-            "2. View All Goals\n",
-            "3. Update Goal Progress\n",
-            "4. View Progress Analytics\n",
-            "5. Exit\n",
-            "Select an option (1-5): 3\n",
-            "\n",
-            "--- YOUR GOALS ---\n",
-            "[1] run 10000 steps | Category: fitness | Progress: 100% | Status: Completed\n",
-            "[2] assignment eng | Category: academic | Progress: 0% | Status: In Progress\n",
-            "\n",
-            "Enter Goal ID to update: 2\n",
-            "Enter new progress percentage (0-100): 50\n",
-            "✅ Progress updated successfully!\n",
-            "\n",
-            "==============================\n",
-            "   GOAL & HABIT TRACKER CLI   \n",
-            "==============================\n",
-            "1. Add New Goal\n",
-            "2. View All Goals\n",
-            "3. Update Goal Progress\n",
-            "4. View Progress Analytics\n",
-            "5. Exit\n",
-            "Select an option (1-5): 4\n",
-            "\n",
-            "--- GOAL ANALYTICS & SUMMARY ---\n",
-            "Total Goals Tracked : 2\n",
-            "Completed Goals     : 1\n",
-            "In-Progress Goals   : 1\n",
-            "Average Completion  : 75.0%\n",
-            "\n",
-            "==============================\n",
-            "   GOAL & HABIT TRACKER CLI   \n",
-            "==============================\n",
-            "1. Add New Goal\n",
-            "2. View All Goals\n",
-            "3. Update Goal Progress\n",
-            "4. View Progress Analytics\n",
-            "5. Exit\n",
-            "Select an option (1-5): 2\n",
-            "\n",
-            "--- YOUR GOALS ---\n",
-            "[1] run 10000 steps | Category: fitness | Progress: 100% | Status: Completed\n",
-            "[2] assignment eng | Category: academic | Progress: 50% | Status: In Progress\n",
-            "\n",
-            "==============================\n",
-            "   GOAL & HABIT TRACKER CLI   \n",
-            "==============================\n",
-            "1. Add New Goal\n",
-            "2. View All Goals\n",
-            "3. Update Goal Progress\n",
-            "4. View Progress Analytics\n",
-            "5. Exit\n",
-            "Select an option (1-5): 5\n",
-            "Saving data and exiting... Goodbye!\n"
-          ]
-        }
-      ]
-    }
-  ]
-}
+    goals.append(new_goal)
+    save_goals(goals)
+    print(f"✅ Goal '{title}' added successfully!")
+
+def view_goals(goals):
+    """Module 2: Displays all tracked goals."""
+    print("\n--- YOUR GOALS ---")
+    if not goals:
+        print("No goals found. Add one first!")
+        return
+    
+    for g in goals:
+        print(f"[{g['id']}] {g['title']} | Category: {g['category']} | Progress: {g['progress']}% | Status: {g['status']}")
+
+def update_progress(goals):
+    """Module 3: Updates goal progress percentage."""
+    view_goals(goals)
+    if not goals:
+        return
+    
+    try:
+        goal_id = int(input("\nEnter Goal ID to update: "))
+        selected = next((g for g in goals if g["id"] == goal_id), None)
+        
+        if selected:
+            new_prog = int(input("Enter new progress percentage (0-100): "))
+            if 0 <= new_prog <= 100:
+                selected["progress"] = new_prog
+                if new_prog == 100:
+                    selected["status"] = "Completed"
+                save_goals(goals)
+                print("✅ Progress updated successfully!")
+            else:
+                print("⚠️ Invalid percentage. Enter a value from 0 to 100.")
+        else:
+            print("⚠️ Goal ID not found.")
+    except ValueError:
+        print("⚠️ Invalid input! Please enter numbers only.")
+
+def view_analytics(goals):
+    """Module 4: Generates summary statistics of tracked goals."""
+    print("\n--- GOAL ANALYTICS & SUMMARY ---")
+    if not goals:
+        print("No goals to analyze. Add some goals first!")
+        return
+    
+    total_goals = len(goals)
+    completed = sum(1 for g in goals if g["status"] == "Completed")
+    in_progress = total_goals - completed
+    total_progress = sum(g["progress"] for g in goals)
+    avg_progress = total_progress / total_goals
+    
+    print(f"Total Goals Tracked : {total_goals}")
+    print(f"Completed Goals     : {completed}")
+    print(f"In-Progress Goals   : {in_progress}")
+    print(f"Average Completion  : {avg_progress:.1f}%")
+
+def main():
+    goals = load_goals()
+    
+    while True:
+        print("\n==============================")
+        print("   GOAL & HABIT TRACKER CLI   ")
+        print("==============================")
+        print("1. Add New Goal")
+        print("2. View All Goals")
+        print("3. Update Goal Progress")
+        print("4. View Progress Analytics")
+        print("5. Exit")
+        
+        choice = input("Select an option (1-5): ").strip()
+        
+        if choice == "1":
+            add_goal(goals)
+        elif choice == "2":
+            view_goals(goals)
+        elif choice == "3":
+            update_progress(goals)
+        elif choice == "4":
+            view_analytics(goals)
+        elif choice == "5":
+            print("Saving data and exiting... Goodbye!")
+            break
+        else:
+            print("Invalid choice! Please select 1-5.")
+
+if __name__ == "__main__":
+    main()
